@@ -138,9 +138,9 @@
     // ====== utilidades de fecha y título ======
     const select=document.getElementById('titleSelect');
     const titleDisplay=document.getElementById('titleDisplay');
-    const fechaInput=document.getElementById('finf');
-    const fecnac=document.getElementById('fecnac');
-    const edad=document.getElementById('edad');
+
+    function getInput(id){ return document.getElementById(id); }
+    function currentReportDate(){ return getInput('finf')?.value || ''; }
 
     function parseYMD(str){const[y,m,d]=str.split('-').map(x=>parseInt(x,10));return{y,m,d};}
     function formatDMY(dd,mm,yy){const d=String(dd).padStart(2,'0');const m=String(mm).padStart(2,'0');const y2=String(yy).slice(-2);return`${d}/${m}/${y2}`;}
@@ -158,7 +158,7 @@
     function setTitleFromSelect(){
       const opt=select.value;
       if(opt==='1') titleDisplay.innerText='Informe médico de traslado - Hospital Hanga Roa';
-      if(opt==='2') { const fecha=formatDateDMY(fechaInput?.value||''); titleDisplay.innerText=`Evolución médica (${fecha}) - Hospital Hanga Roa`; }
+      if(opt==='2') { const fecha=formatDateDMY(currentReportDate()); titleDisplay.innerText=`Evolución médica (${fecha}) - Hospital Hanga Roa`; }
       if(opt==='3') titleDisplay.innerText='Epicrisis médica';
       if(opt==='4') titleDisplay.innerText='Epicrisis médica de traslado';
       if(opt==='5') titleDisplay.innerText='';
@@ -180,12 +180,23 @@
       }
     });
 
-    if(fechaInput) fechaInput.addEventListener('input', ()=>{
-      // Mantener sincronizado el título con la "Fecha del informe" cuando sea Evolución médica
-      if(select.value==='2') setTitleFromSelect();
-      if(fecnac?.value) edad.value=calcEdadY(fecnac.value, fechaInput.value);
-    });
-    if(fecnac) fecnac.addEventListener('input', ()=>{ edad.value=calcEdadY(fecnac.value, fechaInput?.value); });
+    function updateAgeFromInputs(){
+      const birth=getInput('fecnac');
+      const ageInput=getInput('edad');
+      if(!birth||!ageInput) return;
+      ageInput.value=calcEdadY(birth.value, currentReportDate());
+    }
+
+    document.addEventListener('input', (ev)=>{
+      const target=ev.target;
+      if(target?.id==='finf'){
+        if(select.value==='2') setTitleFromSelect();
+        updateAgeFromInputs();
+      }
+      if(target?.id==='fecnac'){
+        updateAgeFromInputs();
+      }
+    }, true);
 
     // ====== edición de secciones ======
     const sheet=document.getElementById('sheet');
@@ -244,6 +255,7 @@
         <div class="row" data-field><div class="lbl" contenteditable="true">Fecha de ingreso</div><input type="date" class="inp" id="fing"><button class="row-del" title="Eliminar este campo">×</button></div>
         <div class="row" data-field><div class="lbl" contenteditable="true">Fecha del informe</div><input type="date" class="inp" id="finf"><button class="row-del" title="Eliminar este campo">×</button></div>`;
       bindPatientRowDeletes(patientGrid);
+      updateAgeFromInputs();
     }
 
     if(addPatientFieldBtn) addPatientFieldBtn.addEventListener('click', addPatientField);
@@ -257,13 +269,31 @@
       document.querySelectorAll('.inp').forEach(i=>{ if(i.type!=='date'&&i.type!=='number'&&i.id!=='') i.value=''; });
       restorePatientDefaults();
       select.value='2'; setTitleFromSelect();
-      if(edad) edad.value='';
+      updateAgeFromInputs();
+    }
+
+    function setEditMode(on){
+      sheet.classList.toggle('edit-mode', on);
+      editPanel.style.display=on?'flex':'none';
+    }
+    function closeEditMode(){ setEditMode(false); }
+    function isEditActionTarget(target){
+      return editPanel.contains(target) ||
+        target.closest('#toggleEdit') ||
+        target.closest('.sec-del') ||
+        target.closest('.row-del');
     }
 
     toggleEdit.addEventListener('click', ()=>{
       const on=!sheet.classList.contains('edit-mode');
-      sheet.classList.toggle('edit-mode', on);
-      editPanel.style.display=on?'flex':'none';
+      setEditMode(on);
+    });
+    document.addEventListener('pointerdown', (ev)=>{
+      const target=ev.target;
+      if(!sheet.classList.contains('edit-mode')) return;
+      if(!target) return;
+      if(isEditActionTarget(target)) return;
+      closeEditMode();
     });
     addSecBtn.addEventListener('click', addSection);
     delSecBtn.addEventListener('click', removeSection);
@@ -320,6 +350,9 @@
       // médico
       document.getElementById('medico').value = model.medico || '';
       document.getElementById('esp').value = model.especialidad || '';
+      const shouldAutoTitle = select.value==='2' && (!model.title || /Evolución médica \(/i.test(model.title));
+      if(shouldAutoTitle) setTitleFromSelect();
+      updateAgeFromInputs();
     }
 
     document.getElementById('exportJson').addEventListener('click', ()=>{
