@@ -355,14 +355,65 @@
       updateAgeFromInputs();
     }
 
-    document.getElementById('exportJson').addEventListener('click', ()=>{
+    function exportDocumentLabel(){
+      let label = titleDisplay.innerText.trim();
+      if(/\s-\sHospital Hanga Roa$/i.test(label)){
+        label = label.replace(/\s*-\s*Hospital Hanga Roa$/i, '').trim();
+      }
+      if(!label){
+        const fecha = formatDateDMY(currentReportDate());
+        const base = select.options[select.selectedIndex]?.text?.split('-')[0]?.trim() || 'Registro clínico';
+        label = fecha && fecha !== '____' ? `${base} (${fecha})` : base;
+      }
+      return label;
+    }
+
+    function sanitizeFilename(name){
+      return name.replace(/[\\/:*?"<>|]/g, '-').replace(/\s+/g, ' ').trim();
+    }
+
+    function exportSuggestedName(){
+      const tipoYFecha = exportDocumentLabel();
+      const patientName = (document.getElementById('nombre')?.value || '').trim();
+      const parts = [tipoYFecha, patientName].filter(Boolean);
+      let name = parts.join(' - ') || 'registro_clinico';
+      name = sanitizeFilename(name);
+      if(!/\.json$/i.test(name)) name += '.json';
+      return name;
+    }
+
+    async function handleExport(){
       const data = getModel();
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+      const payload = JSON.stringify(data, null, 2);
+      const suggestedName = exportSuggestedName();
+
+      if(window.showSaveFilePicker){
+        try{
+          const handle = await window.showSaveFilePicker({
+            suggestedName,
+            types:[{ description:'Archivo JSON', accept:{ 'application/json':['.json'] } }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(payload);
+          await writable.close();
+          return;
+        }catch(err){
+          if(err?.name === 'AbortError') return; // usuario canceló
+          console.error('Error al exportar archivo', err);
+          alert('No se pudo exportar el archivo. Intente nuevamente.');
+          return;
+        }
+      }
+
+      const blob = new Blob([payload], { type:'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = 'registro_clinico.json';
-      a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
-    });
+      a.download = suggestedName;
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+    }
+
+    document.getElementById('exportJson').addEventListener('click', ()=>{ handleExport(); });
     document.getElementById('importJson').addEventListener('change', (ev)=>{
       const file = ev.target.files?.[0]; if(!file) return;
       const reader = new FileReader();
