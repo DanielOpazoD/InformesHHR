@@ -10,19 +10,56 @@
 <body>
   <!-- Barra superior -->
   <div class="topbar">
-    <select id="titleSelect" class="inp" style="width:auto;">
-      <option value="1">Informe médico de traslado - Hospital Hanga Roa</option>
-      <option value="2" selected>Evolución médica (FECHA) - Hospital Hanga Roa</option>
-      <option value="3">Epicrisis médica</option>
-      <option value="4">Epicrisis médica de traslado</option>
-      <option value="5">Otro (personalizado)</option>
-      <option value="6">Informe médico - Hospital Hanga Roa</option>
-    </select>
-    <button id="btnPrint" class="btn" type="button">Imprimir / Guardar PDF</button>
-    <button id="toggleEdit" class="btn" type="button">Editar secciones</button>
-    <button id="exportJson" class="btn" type="button" title="Exportar registro (.json)">Exportar</button>
-    <label class="btn" for="importJson" title="Importar registro (.json)">Importar</label>
-    <input id="importJson" type="file" accept="application/json" style="display:none" />
+    <div class="topbar__branding">
+      <div class="topbar__logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" focusable="false">
+          <defs>
+            <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#38bdf8" />
+              <stop offset="100%" stop-color="#1d4ed8" />
+            </linearGradient>
+          </defs>
+          <rect x="2" y="2" width="28" height="28" rx="8" fill="url(#brandGradient)" />
+          <path d="M16 8c.884 0 1.6.716 1.6 1.6v4.8h4.8a1.6 1.6 0 1 1 0 3.2H17.6v4.8a1.6 1.6 0 1 1-3.2 0V17.6H9.6a1.6 1.6 0 1 1 0-3.2h4.8V9.6c0-.884.716-1.6 1.6-1.6Z" fill="#fff" />
+        </svg>
+      </div>
+      <div class="topbar__info">
+        <span class="topbar__brand">Hospital Hanga Roa</span>
+        <span class="topbar__product">Registro Clínico</span>
+      </div>
+    </div>
+    <div class="topbar__controls">
+      <div class="topbar__select">
+        <label class="sr-only" for="titleSelect">Tipo de informe</label>
+        <select id="titleSelect" class="inp" style="width:auto;">
+          <option value="1">Informe médico de traslado - Hospital Hanga Roa</option>
+          <option value="2" selected>Evolución médica (FECHA) - Hospital Hanga Roa</option>
+          <option value="3">Epicrisis médica</option>
+          <option value="4">Epicrisis médica de traslado</option>
+          <option value="5">Otro (personalizado)</option>
+          <option value="6">Informe médico - Hospital Hanga Roa</option>
+        </select>
+      </div>
+      <div class="topbar__buttons">
+        <button id="btnPrint" class="btn" type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V4.75A1.75 1.75 0 0 1 7.75 3h8.5A1.75 1.75 0 0 1 18 4.75V9h.25A2.75 2.75 0 0 1 21 11.75v3.5A2.75 2.75 0 0 1 18.25 18H18v1.25A1.75 1.75 0 0 1 16.25 21h-8.5A1.75 1.75 0 0 1 6 19.25V18h-.25A2.75 2.75 0 0 1 3 15.25v-3.5A2.75 2.75 0 0 1 5.75 9H6Zm2.5-3.75v3.75h7V5.25a.25.25 0 0 0-.25-.25h-6.5a.25.25 0 0 0-.25.25Zm7 11.5h-7v2.5c0 .138.112.25.25.25h6.5a.25.25 0 0 0 .25-.25v-2.5ZM5.75 10.5a1.25 1.25 0 0 0-1.25 1.25v3.5c0 .69.56 1.25 1.25 1.25H6V13a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v3.5h.25c.69 0 1.25-.56 1.25-1.25v-3.5c0-.69-.56-1.25-1.25-1.25h-12.5Z" fill="currentColor"/></svg>
+          <span>Imprimir / Guardar PDF</span>
+        </button>
+        <button id="toggleEdit" class="btn" type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M5.88 18.12 4 20l1.88-1.88Zm.74.74 10.6-10.6a1 1 0 0 0 0-1.4l-1.68-1.69a1 1 0 0 0-1.41 0L3.53 15.77a1 1 0 0 0-.27.5l-.74 3a1 1 0 0 0 1.23 1.23l3-.74a1 1 0 0 0 .5-.27ZM13.5 6l1.5 1.5 1-1L14.5 5Z" fill="currentColor"/></svg>
+          <span>Editar secciones</span>
+        </button>
+        <button id="exportJson" class="btn" type="button" title="Exportar registro (.json)">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16a1 1 0 0 0 .7-.29l3-3a1 1 0 0 0-1.4-1.42L13 12.59V5a1 1 0 1 0-2 0v7.59l-1.3-1.3a1 1 0 0 0-1.4 1.42l3 3c.19.18.44.29.7.29Z" fill="currentColor"/><path d="M6 17a3 3 0 0 1-3-3v-1a3 3 0 0 1 3-3 1 1 0 1 0 0-2 5 5 0 0 0-5 5v1a5 5 0 0 0 5 5h12a5 5 0 0 0 5-5v-1a5 5 0 0 0-5-5 1 1 0 1 0 0 2 3 3 0 0 1 3 3v1a3 3 0 0 1-3 3Z" fill="currentColor"/></svg>
+          <span>Exportar</span>
+        </button>
+        <label class="btn" for="importJson" title="Importar registro (.json)">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14a1 1 0 0 0 .7-.29l3-3a1 1 0 0 0-1.4-1.42L13 10.59V3a1 1 0 0 0-2 0v7.59l-1.3-1.3a1 1 0 0 0-1.4 1.42l3 3c.19.18.44.29.7.29Z" fill="currentColor"/><path d="M6 17a3 3 0 0 1-3-3v-1a3 3 0 0 1 3-3 1 1 0 1 0 0-2 5 5 0 0 0-5 5v1a5 5 0 0 0 5 5h12a5 5 0 0 0 5-5v-1a5 5 0 0 0-5-5 1 1 0 1 0 0 2 3 3 0 0 1 3 3v1a3 3 0 0 1-3 3Z" fill="currentColor"/></svg>
+          <span>Importar</span>
+        </label>
+        <input id="importJson" type="file" accept="application/json" style="display:none" />
+      </div>
+    </div>
   </div>
 
   <div class="wrap">
