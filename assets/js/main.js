@@ -15,7 +15,8 @@ import {
   removeLastSection,
   restoreClinicalSections,
   applyTemplateSections,
-  collectSections
+  collectSections,
+  hydrateSections
 } from './controllers/sectionController.js';
 import { formatDateDMY } from './utils/dateUtils.js';
 
@@ -105,6 +106,9 @@ function init() {
     updateAge(patientGrid, getReportDate());
   };
 
+  const templateStates = new Map();
+  let currentTemplateId = select.value;
+
   const restoreAll = () => {
     select.value = '2';
     restoreClinicalSections(sectionsContainer);
@@ -116,6 +120,25 @@ function init() {
     if (especialidadInput) {
       especialidadInput.value = '';
     }
+    templateStates.clear();
+    currentTemplateId = select.value;
+  };
+
+  const storeCurrentTemplateState = () => {
+    if (!currentTemplateId) {
+      return null;
+    }
+    const model = getModel();
+    templateStates.set(currentTemplateId, model);
+    return model;
+  };
+
+  const applyTemplateStructure = (templateId) => {
+    if (templateId === '6') {
+      applyTemplateSections(sectionsContainer, '6');
+      return;
+    }
+    restoreClinicalSections(sectionsContainer);
   };
 
   if (addSectionButton) {
@@ -135,10 +158,18 @@ function init() {
   }
 
   select.addEventListener('change', () => {
-    if (select.value === '6') {
-      applyTemplateSections(sectionsContainer, '6');
-    } else if (select.value === '2') {
-      restoreClinicalSections(sectionsContainer);
+    const previousModel = storeCurrentTemplateState();
+    currentTemplateId = select.value;
+
+    const savedModel = templateStates.get(currentTemplateId);
+    if (savedModel) {
+      applyModel(savedModel);
+      return;
+    }
+
+    applyTemplateStructure(currentTemplateId);
+    if (previousModel?.sections) {
+      hydrateSections(sectionsContainer, previousModel.sections);
     }
   });
 
@@ -198,6 +229,7 @@ function init() {
     }
 
     updateAge(patientGrid, getReportDate());
+    currentTemplateId = select.value;
   };
 
   if (exportButton && importInput) {

@@ -63,3 +63,40 @@ export function collectSections(container) {
     content: section.querySelector('textarea')?.value || ''
   }));
 }
+
+export function hydrateSections(container, sections = []) {
+  if (!Array.isArray(sections) || sections.length === 0) {
+    return;
+  }
+
+  const existingSections = Array.from(container.querySelectorAll('.sec[data-section]'));
+  sections.forEach((section, index) => {
+    if (!section || typeof section !== 'object') {
+      return;
+    }
+
+    const target = existingSections[index];
+    const title = (section.title ?? '').trim();
+    const content = section.content ?? '';
+
+    if (target) {
+      const subtitle = target.querySelector('.subtitle');
+      if (subtitle && title) {
+        subtitle.innerText = title;
+      }
+
+      const textarea = target.querySelector('textarea');
+      if (textarea) {
+        textarea.value = String(content);
+      }
+      return;
+    }
+
+    const extraSection = createSectionElement({
+      title: title || 'Sección personalizada',
+      content: String(content)
+    });
+    container.appendChild(extraSection);
+    existingSections.push(extraSection);
+  });
+}
