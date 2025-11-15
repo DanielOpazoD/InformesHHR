@@ -1,5 +1,27 @@
 import { createDefaultSections, getTemplateSections } from '../models/defaults.js';
 
+function mergeSectionsWithContent(templateSections, previousSections = []) {
+  if (!Array.isArray(previousSections) || previousSections.length === 0) {
+    return templateSections.map((section) => ({ ...section }));
+  }
+
+  const merged = templateSections.map((section, index) => ({
+    title: previousSections[index]?.title?.trim() || section.title || '',
+    content: previousSections[index]?.content || ''
+  }));
+
+  if (previousSections.length > templateSections.length) {
+    previousSections.slice(templateSections.length).forEach((section) => {
+      merged.push({
+        title: section.title || '',
+        content: section.content || ''
+      });
+    });
+  }
+
+  return merged;
+}
+
 function createSectionElement(section) {
   const container = document.createElement('div');
   container.className = 'sec';
@@ -49,12 +71,15 @@ export function removeLastSection(container) {
   sections[sections.length - 1].remove();
 }
 
-export function restoreClinicalSections(container) {
-  renderSections(container, createDefaultSections());
+export function restoreClinicalSections(container, previousSections) {
+  const sections = mergeSectionsWithContent(createDefaultSections(), previousSections);
+  renderSections(container, sections);
 }
 
-export function applyTemplateSections(container, templateId) {
-  renderSections(container, getTemplateSections(templateId));
+export function applyTemplateSections(container, templateId, previousSections) {
+  const templateSections = getTemplateSections(templateId);
+  const sections = mergeSectionsWithContent(templateSections, previousSections);
+  renderSections(container, sections);
 }
 
 export function collectSections(container) {
