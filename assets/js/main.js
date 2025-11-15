@@ -17,6 +17,7 @@ import {
   applyTemplateSections,
   collectSections
 } from './controllers/sectionController.js';
+import { DEFAULT_PATIENT_FIELDS } from './models/defaults.js';
 import { formatDateDMY } from './utils/dateUtils.js';
 
 function getElement(id) {
@@ -71,6 +72,13 @@ function sanitizeSectionsForRender(sections = []) {
     title: section.title || '',
     content: section.content || ''
   }));
+}
+
+const DEFAULT_PATIENT_FIELD_IDS = DEFAULT_PATIENT_FIELDS.map((field) => field.id).filter(Boolean);
+
+function computeRemovedPatientFieldIds(activeFields) {
+  const activeIds = new Set(activeFields.map((field) => field.id).filter(Boolean));
+  return DEFAULT_PATIENT_FIELD_IDS.filter((id) => !activeIds.has(id));
 }
 
 function init() {
@@ -136,9 +144,11 @@ function init() {
 
   select.addEventListener('change', () => {
     if (select.value === '6') {
-      applyTemplateSections(sectionsContainer, '6');
+      const snapshot = collectSections(sectionsContainer);
+      applyTemplateSections(sectionsContainer, '6', snapshot);
     } else if (select.value === '2') {
-      restoreClinicalSections(sectionsContainer);
+      const snapshot = collectSections(sectionsContainer);
+      restoreClinicalSections(sectionsContainer, snapshot);
     }
   });
 
@@ -156,15 +166,19 @@ function init() {
     }
   }, true);
 
-  const getModel = () => ({
-    version: 'v12',
-    template: select.value,
-    title: titleDisplay.innerText.trim(),
-    patientFields: collectPatientFields(patientGrid),
-    medico: medicoInput?.value || '',
-    especialidad: especialidadInput?.value || '',
-    sections: collectSections(sectionsContainer)
-  });
+  const getModel = () => {
+    const patientFields = collectPatientFields(patientGrid);
+    return {
+      version: 'v13',
+      template: select.value,
+      title: titleDisplay.innerText.trim(),
+      patientFields,
+      removedDefaultPatientFieldIds: computeRemovedPatientFieldIds(patientFields),
+      medico: medicoInput?.value || '',
+      especialidad: especialidadInput?.value || '',
+      sections: collectSections(sectionsContainer)
+    };
+  };
 
   const applyModel = (model) => {
     if (model.template) {
