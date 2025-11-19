@@ -8,6 +8,7 @@ Aplicación web liviana para gestionar y documentar la evolución clínica de pa
 - **Plantillas dinámicas**: selector de tipo de informe con títulos autogenerados y estructuras preconfiguradas.
 - **Importación / exportación**: persistencia del formulario completo en JSON con nombres de archivo sugeridos.
 - **Impresión profesional**: título y nombre del archivo ajustados automáticamente antes de imprimir o guardar en PDF.
+- **Panel IA contextual**: asistente Gemini con flujo dual (conversación y edición puntual) que consume toda la ficha clínica como contexto, con acciones rápidas y aplicación directa del texto propuesto en cada sección.
 
 ## Estructura del proyecto
 
@@ -57,6 +58,13 @@ Cada controlador encapsula una responsabilidad concreta:
 - **Persistencia**: mantenga la compatibilidad del esquema JSON agregando un campo `version` (actualmente `v12`). Documente cualquier cambio en el README.
 - **Estilo de código**: utilice ES Modules, funciones puras cuando sea posible y evite dependencias globales. Prefiera `const` para referencias inmutables.
 - **Pruebas manuales**: verifique siempre los flujos de exportación, importación y actualización de títulos tras tocar módulos relacionados.
+
+### Panel IA Gemini
+
+1. Obtenga una API Key válida de Gemini (o credenciales Vertex) y configúrela desde el botón ⚙️ del panel.
+2. Utilice las pestañas **Conversación** o **Editar sección** para definir el flujo. En modo edición puede seleccionar la sección destino y aplicar la propuesta con un clic.
+3. Las preferencias (API Key, modelo, ancho del panel, etc.) se almacenan localmente en el navegador para evitar reingresos.
+4. Si el modelo seleccionado no está disponible, la app intentará elegir automáticamente un fallback compatible.
 
 ## Controles internos y aseguramiento de calidad
 
