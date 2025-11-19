@@ -18,6 +18,7 @@ import {
   collectSections
 } from './controllers/sectionController.js';
 import { formatDateDMY } from './utils/dateUtils.js';
+import { initAIController } from './controllers/aiController.js';
 
 function getElement(id) {
   return document.getElementById(id);
@@ -73,6 +74,38 @@ function sanitizeSectionsForRender(sections = []) {
   }));
 }
 
+function buildFullRecordContent({ titleDisplay, patientGrid, sectionsContainer, medicoInput, especialidadInput }) {
+  const title = titleDisplay?.innerText?.trim() || '';
+  const patientFields = collectPatientFields(patientGrid);
+  const sections = collectSections(sectionsContainer);
+  const medico = medicoInput?.value?.trim() || '';
+  const especialidad = especialidadInput?.value?.trim() || '';
+
+  const lines = [];
+  if (title) {
+    lines.push(`Título: ${title}`);
+  }
+  if (patientFields.length) {
+    lines.push('', 'Información del paciente:');
+    patientFields.forEach((field) => {
+      lines.push(`${field.label || field.id}: ${field.value || ''}`);
+    });
+  }
+  if (sections.length) {
+    lines.push('', 'Secciones clínicas:');
+    sections.forEach((section) => {
+      lines.push(section.title || 'Sin título');
+      lines.push(section.content || '');
+      lines.push('');
+    });
+  }
+  if (medico || especialidad) {
+    lines.push('', `Médico tratante: ${medico || '—'}`);
+    lines.push(`Especialidad: ${especialidad || '—'}`);
+  }
+  return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
 function init() {
   const select = getElement('titleSelect');
   const titleDisplay = getElement('titleDisplay');
@@ -89,6 +122,8 @@ function init() {
   const exportButton = getElement('exportJson');
   const importInput = getElement('importJson');
   const printButton = getElement('btnPrint');
+  const aiToggleButton = getElement('toggleAI');
+  const aiPanel = getElement('aiDrawer');
   const medicoInput = getElement('medico');
   const especialidadInput = getElement('esp');
 
@@ -214,6 +249,34 @@ function init() {
     button: printButton,
     select,
     getPatientName
+  });
+
+  initAIController({
+    panel: aiPanel,
+    toggleButton: aiToggleButton,
+    sectionsContainer,
+    getPatientFields: () => collectPatientFields(patientGrid),
+    getSectionsSnapshot: () => collectSections(sectionsContainer),
+    getTitle: () => titleDisplay.innerText.trim(),
+    getMedico: () => medicoInput?.value || '',
+    getEspecialidad: () => especialidadInput?.value || '',
+    getFullContext: () =>
+      buildFullRecordContent({
+        titleDisplay,
+        patientGrid,
+        sectionsContainer,
+        medicoInput,
+        especialidadInput
+      }),
+    onApplyToSection: (sectionIndex, newContent) => {
+      const sections = sectionsContainer.querySelectorAll('.sec[data-section]');
+      const section = sections[sectionIndex];
+      const textarea = section?.querySelector('textarea');
+      if (textarea) {
+        textarea.value = newContent || '';
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }
   });
 
   restoreAll();

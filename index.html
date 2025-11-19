@@ -20,6 +20,7 @@
     </select>
     <button id="btnPrint" class="btn" type="button">Imprimir / Guardar PDF</button>
     <button id="toggleEdit" class="btn" type="button">Editar secciones</button>
+    <button id="toggleAI" class="btn" type="button">Panel IA</button>
     <button id="exportJson" class="btn" type="button" title="Exportar registro (.json)">Exportar</button>
     <label class="btn" for="importJson" title="Importar registro (.json)">Importar</label>
     <input id="importJson" type="file" accept="application/json" style="display:none" />
@@ -66,5 +67,86 @@
   </div>
 
   <script type="module" src="assets/js/main.js"></script>
+
+  <aside id="aiDrawer" class="ai-drawer" aria-hidden="true">
+    <div class="ai-resize-handle" data-ai-resizer></div>
+    <div class="ai-drawer-inner">
+      <header class="ai-drawer-header">
+        <div>
+          <h3 class="ai-drawer-title">Asistente IA</h3>
+          <p class="ai-drawer-subtitle" data-ai-subtitle>Analiza el caso clínico completo</p>
+        </div>
+        <div class="ai-header-actions">
+          <button class="ai-ghost-btn" type="button" data-ai-settings-toggle title="Configuración">
+            ⚙️
+          </button>
+          <button class="ai-close-btn" type="button" data-ai-close title="Cerrar panel">✕</button>
+        </div>
+      </header>
+
+      <section class="ai-panel-settings" data-ai-settings>
+        <div class="ai-settings-grid">
+          <label class="ai-field">
+            <span>API Key Gemini</span>
+            <input type="password" data-ai-api-key placeholder="AIza..." autocomplete="off" />
+          </label>
+          <label class="ai-field">
+            <span>ID de proyecto (Vertex)</span>
+            <input type="text" data-ai-project placeholder="Opcional" autocomplete="off" />
+          </label>
+          <label class="ai-field">
+            <span>Modelo preferido</span>
+            <input type="text" data-ai-model placeholder="gemini-1.5-flash-latest" autocomplete="off" />
+          </label>
+          <label class="ai-field">
+            <span>Perfil médico</span>
+            <select data-ai-profile>
+              <option value="general">👨‍⚕️ Medicina general</option>
+              <option value="urgencias">🚑 Urgencias</option>
+              <option value="pediatria">👶 Pediatría</option>
+            </select>
+          </label>
+          <label class="ai-check">
+            <input type="checkbox" data-ai-markdown checked />
+            <span>Formatear respuestas en Markdown</span>
+          </label>
+          <label class="ai-check">
+            <input type="checkbox" data-ai-auto-model checked />
+            <span>Cambiar de modelo automáticamente si falla</span>
+          </label>
+        </div>
+        <p class="ai-settings-hint">Los datos se guardan localmente en este navegador.</p>
+      </section>
+
+      <div class="ai-tabs">
+        <button class="ai-tab" data-ai-mode="chat" type="button">💬 Conversación</button>
+        <button class="ai-tab" data-ai-mode="edit" type="button">📝 Editar sección</button>
+      </div>
+
+      <section class="ai-section-picker" data-ai-section-picker>
+        <label for="aiSectionSelect">Editando sección</label>
+        <select id="aiSectionSelect" data-ai-section-select></select>
+      </section>
+
+      <div class="ai-quick-actions" data-ai-actions></div>
+
+      <div class="ai-messages" data-ai-messages>
+        <div class="ai-empty" data-ai-empty>
+          <p class="ai-empty-icon">🤖</p>
+          <p>Configura tu API Key y comienza a interactuar con el asistente.</p>
+          <p class="ai-empty-hint">La IA recibe toda la ficha clínica como contexto.</p>
+        </div>
+      </div>
+      <div class="ai-error" data-ai-error role="alert"></div>
+
+      <div class="ai-input" data-ai-input-area>
+        <textarea data-ai-input rows="2" placeholder="Haz una pregunta o pide una mejora..." spellcheck="false"></textarea>
+        <button type="button" class="ai-send" data-ai-send title="Enviar">
+          <span>Enviar</span>
+        </button>
+        <p class="ai-input-hint">Shift + Enter para nueva línea</p>
+      </div>
+    </div>
+  </aside>
 </body>
 </html>
